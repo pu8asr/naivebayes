@@ -1,10 +1,14 @@
 #!/usr/local/bin/pypy
 
 help_message="""
-Usage: crawler.py <links-file>
+Usage: crawler.py [--pick-from-last]
+                  <links-file>
                   <tagfile>
                   <pages-directory>
                   <failure-file>
+
+Options:
+    --pick-from-last
 
 """
 import sys
@@ -30,15 +34,17 @@ arguments = docopt(help_message)
 links_file = arguments['<links-file>']
 tagfile = arguments['<tagfile>']
 pages_dir = arguments['<pages-directory>']
+pick_from_last = arguments['--pick-from-last']
 failure_file = arguments['<failure-file>']
 
 tagfile_handler = open(tagfile, 'a')
 failure_file_handler = open(failure_file, 'a')
 
 # Pick off from where you last left
-last_link_processed = int(max(
-    os.popen("tail -1 {0}".format(tagfile)).read().split()[0],
-    os.popen("tail -1 {0}".format(failure_file)).read().split()[0]))
+last_link_processed = (int(max(
+        os.popen("tail -1 {0}".format(tagfile)).read().split()[0],
+        os.popen("tail -1 {0}".format(failure_file)).read().split()[0]))
+    if pick_from_last else -1)
 
 with open(links_file) as f:
     for idx, line in enumerate(f):
